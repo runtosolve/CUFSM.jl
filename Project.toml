@@ -1,0 +1,4 @@
+name = "CUFSM"
+uuid = "82b4978f-06ae-48e0-88e8-a26b4f7a0fa1"
+authors = ["Cris Moen <cris.moen@runtosolve.com>"]
+version = "0.1.0"
