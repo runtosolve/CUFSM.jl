@@ -1,29 +1,5 @@
-CUFSM.jl
-==========
-
-*Cross-Section Elastic Buckling Analysis*
-
-Calculate cross-section elastic buckling modes with the finite strip method.   This is a direct translation of [CUFSM v5.04](https://www.ce.jhu.edu/cufsm/downloads/), without constrained finite strip (cFSM) functionality. 
-
-Install
------------------------------
-
-```julia
-(v1.7) pkg> add CUFSM
-```
-
-(Type `]` to enter package mode.)
-
-Example Usage
--------------
-
-```julia
 using CUFSM
-```
 
-Run the CUFSM default buckling analysis that comes up when you open the program.
-
-```julia
 
 prop = [100 29500.00 29500.00 0.30 0.30 11346.15]
 
@@ -84,11 +60,8 @@ lengths = [1.00
 
 springs = []
 
-constraints = []
+constraints = 0
 
 neigs = 20
 
 curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
-
-
-```
