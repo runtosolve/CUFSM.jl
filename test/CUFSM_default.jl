@@ -60,7 +60,7 @@ lengths = [1.00
 
 springs = []
 
-constraints = 0
+constraints = []
 
 neigs = 20
 

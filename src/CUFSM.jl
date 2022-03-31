@@ -104,6 +104,7 @@ function template_out_to_in(H,B1,D1,q1,B2,D2,q2,ri1,ri2,ri3,ri4,t)
 
 end
 
+template_out_to_in(;H,B1,D1,q1,B2,D2,q2,ri1,ri2,ri3,ri4,t) = template_out_to_in(H,B1,D1,q1,B2,D2,q2,ri1,ri2,ri3,ri4,t)
 
 function templatecalc(CorZ,h,b1,b2,d1,d2,r1,r2,r3,r4,q1,q2,t,nh,nb1,nb2,nd1,nd2,nr1,nr2,nr3,nr4,kipin,center)
 	#Translated from CUFSM v5.01 Matlab download, thanks Ben.
