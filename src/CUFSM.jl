@@ -5,7 +5,7 @@ using LinearAlgebra
 using Statistics
 using Plots
 
-export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, SectionProperties, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
+export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
 
 struct data
 
