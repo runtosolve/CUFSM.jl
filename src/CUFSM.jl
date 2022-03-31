@@ -5,7 +5,7 @@ using LinearAlgebra
 using Statistics
 using Plots
 
-export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
+export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, SectionPropertiesObject, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
 
 struct data
 
@@ -21,7 +21,7 @@ struct data
 
 end
 
-struct SectionProperties
+struct SectionPropertiesObject
 
     node_geometry::Array{Float64, 2}
     element_info::Array{Float64, 2}
@@ -798,7 +798,7 @@ function cutwp_prop2(coord,ends)
 
     end
 
-    section_properties = SectionProperties(coord,ends,A,xc,yc,Ix,Iy,Ixy,theta,I1,I2,J,xs,ys,Cw,B1,B2,wn)
+    section_properties = SectionPropertiesObject(coord,ends,A,xc,yc,Ix,Iy,Ixy,theta,I1,I2,J,xs,ys,Cw,B1,B2,wn)
 
     return section_properties
 
