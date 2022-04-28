@@ -1472,9 +1472,9 @@ function constr_BCFlag(node,constraints)
     BCFlag=0
     for i=1:nnodes
         for j=4:7
-            if node[i,j]==0
+            if Int(node[i,j])==0
                 BCFlag=1
-                return
+                return BCFlag
             end
         end
     end
