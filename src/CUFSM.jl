@@ -3,7 +3,7 @@ module CUFSM
 using SparseArrays
 using LinearAlgebra
 using Statistics
-using Plots
+# using Plots
 
 export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, SectionPropertiesObject, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
 
@@ -2091,30 +2091,30 @@ function stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,un
 
 end
 
-function view_closed_section_mode_shape(node, shapes, mode_index, scale_x, scale_y)
+# function view_closed_section_mode_shape(node, shapes, mode_index, scale_x, scale_y)
 
-    num_nodes = size(node)[1]
+#     num_nodes = size(node)[1]
 
-    mode = shapes[mode_index]
+#     mode = shapes[mode_index]
 
-    mode_x = mode[1:2:2*num_nodes]
-    mode_y = mode[(2*num_nodes + 1):2:4*num_nodes]
+#     mode_x = mode[1:2:2*num_nodes]
+#     mode_y = mode[(2*num_nodes + 1):2:4*num_nodes]
 
-    defx = node[:, 2] .+ scale_x * mode_x
-    defy = node[:, 3] .+scale_y * mode_y
+#     defx = node[:, 2] .+ scale_x * mode_x
+#     defy = node[:, 3] .+scale_y * mode_y
 
-    #For a closed cross-section, add first node to end for plotting.
-    defx = [defx; defx[1]]
-    defy = [defy; defy[1]]
+#     #For a closed cross-section, add first node to end for plotting.
+#     defx = [defx; defx[1]]
+#     defy = [defy; defy[1]]
 
-    #Define undeformed shape.
-    undefx = [node[:,2]; node[2,1]]
-    undefy = [node[:,3]; node[3,2]]
+#     #Define undeformed shape.
+#     undefx = [node[:,2]; node[2,1]]
+#     undefy = [node[:,3]; node[3,2]]
 
-    plot(undefx, undefy, size = (600,600), legend = false)
-    plot!(defx, defy, markershape = :o)
+#     plot(undefx, undefy, size = (600,600), legend = false)
+#     plot!(defx, defy, markershape = :o)
 
-end
+# end
 
 function closed_section_analysis(P, Mxx, Mzz, M11, M22, E, ν, coord, ends, lengths)
 
@@ -2184,46 +2184,46 @@ function closed_section_analysis(P, Mxx, Mzz, M11, M22, E, ν, coord, ends, leng
 end
 
 
-function view_multi_branch_section_mode_shape(node, elem, shapes, mode_index, scale_x, scale_y, xlims, ylims)
+# function view_multi_branch_section_mode_shape(node, elem, shapes, mode_index, scale_x, scale_y, xlims, ylims)
 
-    num_nodes = size(node)[1]
+#     num_nodes = size(node)[1]
 
-    mode = shapes[mode_index]
+#     mode = shapes[mode_index]
 
-    undefx = node[:, 2]
-    undefy = node[:, 3]
+#     undefx = node[:, 2]
+#     undefy = node[:, 3]
 
-    mode_x = mode[1:2:2*num_nodes]
-    mode_y = mode[(2*num_nodes + 1):2:4*num_nodes]
+#     mode_x = mode[1:2:2*num_nodes]
+#     mode_y = mode[(2*num_nodes + 1):2:4*num_nodes]
 
-    defx = node[:, 2] .+ scale_x * mode_x
-    defy = node[:, 3] .+scale_y * mode_y
+#     defx = node[:, 2] .+ scale_x * mode_x
+#     defy = node[:, 3] .+scale_y * mode_y
 
-    #For a multi-branch cross-section, plot each element individually.
+#     #For a multi-branch cross-section, plot each element individually.
 
-    num_elem = size(elem)[1]
+#     num_elem = size(elem)[1]
 
-    for i = 1:num_elem
+#     for i = 1:num_elem
 
-        node_i = Int(elem[i, 2])
-        node_j = Int(elem[i, 3])
+#         node_i = Int(elem[i, 2])
+#         node_j = Int(elem[i, 3])
 
-        if i == 1
+#         if i == 1
 
-            plot([undefx[node_i], undefx[node_j]], [undefy[node_i], undefy[node_j]], size = (600, 600), legend = false, linecolor = :black, xlims = xlims, ylims = ylims, aspect_ratio = :equal)
-            plot!([defx[node_i], defx[node_j]], [defy[node_i], defy[node_j]], legend = false, linecolor = :blue)
+#             plot([undefx[node_i], undefx[node_j]], [undefy[node_i], undefy[node_j]], size = (600, 600), legend = false, linecolor = :black, xlims = xlims, ylims = ylims, aspect_ratio = :equal)
+#             plot!([defx[node_i], defx[node_j]], [defy[node_i], defy[node_j]], legend = false, linecolor = :blue)
     
-        else
-            plot!([undefx[node_i], undefx[node_j]], [undefy[node_i], undefy[node_j]], legend = false, linecolor = :black)
-            plot!([defx[node_i], defx[node_j]], [defy[node_i], defy[node_j]], legend = false, linecolor = :blue)
+#         else
+#             plot!([undefx[node_i], undefx[node_j]], [undefy[node_i], undefy[node_j]], legend = false, linecolor = :black)
+#             plot!([defx[node_i], defx[node_j]], [defy[node_i], defy[node_j]], legend = false, linecolor = :blue)
 
-        end
+#         end
 
-    end
+#     end
 
-    return current()
+#     return current()
 
-end
+# end
 
 
 
