@@ -1,8 +1,7 @@
 module CUFSM
 
-using SparseArrays
-using LinearAlgebra
-using Statistics
+using SparseArrays, LinearAlgebra, Statistics, Unitful
+
 # using Plots
 
 export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, SectionPropertiesObject, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
@@ -466,19 +465,27 @@ function cutwp_prop2(coord,ends)
         end
     end
 
-    t = zeros(Float64, nele)
-    xm = zeros(Float64, nele)
-    ym = zeros(Float64, nele)
-    xd = zeros(Float64, nele)
-    yd = zeros(Float64, nele)
-    L = zeros(Float64, nele)
+    # t = zeros(Float64, nele)
+    # xm = zeros(Float64, nele)
+    # ym = zeros(Float64, nele)
+    # xd = zeros(Float64, nele)
+    # yd = zeros(Float64, nele)
+    # L = zeros(Float64, nele)
+
+    t = Vector{Any}(undef, nele)
+    xm = Vector{Any}(undef, nele)
+    ym = Vector{Any}(undef, nele)
+    xd = Vector{Any}(undef, nele)
+    yd = Vector{Any}(undef, nele)
+    L = Vector{Any}(undef, nele)
+
 
     # find the element properties
     for i = 1:nele
         sn = ends[i,1]; fn = ends[i,2];
 
-        sn = Int(sn)
-        fn = Int(fn)
+        sn = convert(Int, sn)
+        fn = convert(Int, fn)
 
         # thickness of the element
         t[i] = ends[i,3]
@@ -499,10 +506,10 @@ function cutwp_prop2(coord,ends)
     yc = sum(L.*t.*ym)/A
 
     if abs(xc/sqrt(A)) .< 1e-12
-        xc = 0
+        xc = 0 * unit(xc)  #add units here if they are assigned to inputs 
     end
     if abs(yc/sqrt(A)) .< 1e-12
-        yc = 0
+        yc = 0 * unit(xc)  #add units here if they are assigned to inputs 
     end
 
     # compute the moment of inertia
@@ -511,13 +518,14 @@ function cutwp_prop2(coord,ends)
     Ixy = sum((xd.*yd/12 .+(xm .-xc).*(ym .-yc)).*L.*t)
 
     if abs(Ixy/A^2) .< 1e-12
-        Ixy = 0
+        Ixy = 0 * unit(Ixy)
     end
 
     # compute the rotation angle for the principal axes()
     theta = angle(Ix-Iy-2*Ixy*1im)/2
 
-    coord12 = zeros(Float64, size(coord))
+    # coord12 = zeros(Float64, size(coord))
+    coord12 = Matrix{Any}(undef, size(coord))
 
     # transfer the section coordinates to the centroid principal coordinates
     coord12[:,1] = coord[:,1] .-xc
@@ -530,8 +538,8 @@ function cutwp_prop2(coord,ends)
         sn = ends[i,1]
         fn = ends[i,2]
 
-        sn = Int(sn)
-        fn = Int(fn)
+        sn = convert(Int, sn)
+        fn = convert(Int, fn)
 
         # compute the coordinate of the mid point of the element
         xm[i] = mean(coord12[[sn fn],1])
