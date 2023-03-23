@@ -1,4 +1,4 @@
-using CUFSM, Plots
+using CUFSM, CairoMakie
 
 
 prop = [100 29500.00 29500.00 0.30 0.30 11346.15]
@@ -66,14 +66,29 @@ neigs = 1
 
 curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
 
+model = CUFSM.Model(prop=prop, node=node, elem=elem, lengths=lengths, springs=springs, constraints=constraints, neigs=neigs, curve=curve, shapes=shapes)
+
+
+#show mode shape 
+mode = shapes[8]
+
+n = fill(5, size(node, 1))
+scale = (1.0, 1.0)
+f = Figure()
+ax = Axis(f[1, 1])
+ax.aspect = 5/10
+f
+
+attributes = (color=:green, linestyle=:solid, linewidth=2, marker=:circle, markersize=10)
+
+CUFSM.Show.cross_section_mode_shape!(ax, elem, node, mode, n, scale, attributes)
+f
+
+
+#get signature curve and all that 
 half_wavelength = [curve[i,1][1] for i=1:length(lengths)]
 load_factor = [curve[i,1][2] for i=1:length(lengths)]
-
-plot(half_wavelength, load_factor)
-
 Mcr = minimum(load_factor)
-
 min_index = findfirst(x->x==minimum(load_factor), load_factor)    
-
 Lcr = half_wavelength[min_index]
 

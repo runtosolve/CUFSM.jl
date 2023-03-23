@@ -1,19 +1,25 @@
 module CUFSM
 
-using SparseArrays, LinearAlgebra, Statistics, Unitful
+using SparseArrays, LinearAlgebra, Statistics, Parameters
 
-# using Plots
 
-export strip, stresgen, data, cutwp_prop2, templatecalc, template_out_to_in, SectionPropertiesObject, view_closed_section_mode_shape, closed_section_analysis, view_multi_branch_section_mode_shape
+export Tools
+include("Tools.jl")
+using .Tools
 
-struct data
+export Show
+include("Show.jl")
+using .Show
+
+
+@with_kw struct Model
 
     prop::Matrix{Float64}
     node::Matrix{Float64}
     elem::Matrix{Float64}
     lengths::Array{Float64}
-    springs::Matrix{Float64}
-    constraints::Union{Matrix{Float64}, Int64}
+    springs::Any
+    constraints::Any #Union{Matrix{Float64}, Int64}
     neigs::Int64
     curve::Vector{Matrix{Float64}}
     shapes::Vector{Matrix{Float64}}
@@ -472,12 +478,12 @@ function cutwp_prop2(coord,ends)
     # yd = zeros(Float64, nele)
     # L = zeros(Float64, nele)
 
-    t = Vector{Any}(undef, nele)
-    xm = Vector{Any}(undef, nele)
-    ym = Vector{Any}(undef, nele)
-    xd = Vector{Any}(undef, nele)
-    yd = Vector{Any}(undef, nele)
-    L = Vector{Any}(undef, nele)
+    t = Vector{Float64}(undef, nele)
+    xm = Vector{Float64}(undef, nele)
+    ym = Vector{Float64}(undef, nele)
+    xd = Vector{Float64}(undef, nele)
+    yd = Vector{Float64}(undef, nele)
+    L = Vector{Float64}(undef, nele)
 
 
     # find the element properties
@@ -506,10 +512,10 @@ function cutwp_prop2(coord,ends)
     yc = sum(L.*t.*ym)/A
 
     if abs(xc/sqrt(A)) .< 1e-12
-        xc = 0 * unit(xc)  #add units here if they are assigned to inputs 
+        xc = 0   
     end
     if abs(yc/sqrt(A)) .< 1e-12
-        yc = 0 * unit(xc)  #add units here if they are assigned to inputs 
+        yc = 0   
     end
 
     # compute the moment of inertia
@@ -518,14 +524,14 @@ function cutwp_prop2(coord,ends)
     Ixy = sum((xd.*yd/12 .+(xm .-xc).*(ym .-yc)).*L.*t)
 
     if abs(Ixy/A^2) .< 1e-12
-        Ixy = 0 * unit(Ixy)
+        Ixy = 0 
     end
 
     # compute the rotation angle for the principal axes()
     theta = angle(Ix-Iy-2*Ixy*1im)/2
 
     # coord12 = zeros(Float64, size(coord))
-    coord12 = Matrix{Any}(undef, size(coord))
+    coord12 = Matrix{Float64}(undef, size(coord))
 
     # transfer the section coordinates to the centroid principal coordinates
     coord12[:,1] = coord[:,1] .-xc
@@ -574,11 +580,17 @@ function cutwp_prop2(coord,ends)
 
         # compute the shear center & initialize variables
         nnode = size(coord,1)
-        w = zeros((nnode,2))
-        w[Int(ends[1,1]),1] = ends[1,1]
-        wo = zeros((nnode,2))
-        wo[Int(ends[1,1]),1] = ends[1,1]
-        Iwx = 0.0; Iwy = 0.0; wno = 0.0; Cw = 0.0
+        # w = zeros((nnode,2))
+        w = Matrix{Float64}(undef, (nnode,2))
+        w[:,1] .= 0.0
+        w[:,2] .= 0.0 
+        w[convert(Int, ends[1,1]),1] = ends[1,1]
+        # wo = zeros((nnode,2))
+        wo = Matrix{Float64}(undef, (nnode,2))
+        wo[:,1] .= 0.0
+        wo[:,2] .= 0.0 
+        wo[convert(Int, ends[1,1]),1] = ends[1,1]
+        Iwx = 0.0 ; Iwy = 0.0 ; wno = 0.0 ; Cw = 0.0 
 
         for j = 1:nele
             i = 1
@@ -588,8 +600,8 @@ function cutwp_prop2(coord,ends)
             sn = ends[i,1]
             fn = ends[i,2]
 
-            sn = Int(sn)
-            fn = Int(fn)
+            sn = convert(Int, sn)
+            fn = convert(Int, fn)
 
             p = ((coord[sn,1]-xc)*(coord[fn,2]-yc)-(coord[fn,1]-xc)*(coord[sn,2]-yc))/L[i]
             if w[sn,1]==0
@@ -626,14 +638,14 @@ function cutwp_prop2(coord,ends)
             sn = ends[i,1]
             fn = ends[i,2]
 
-            sn = Int(sn)
-            fn = Int(fn)
+            sn = convert(Int, sn)
+            fn = convert(Int, fn)
 
             po = ((coord[sn,1]-xs)*(coord[fn,2]-ys)-(coord[fn,1]-xs)*(coord[sn,2]-ys))/L[i]
             if wo[sn,1]==0
                 wo[sn,1] = sn;
                 wo[sn,2] = wo[fn,2]-po*L[i]
-            elseif wo[Int(ends[i,2]),1]==0
+            elseif wo[convert(Int, ends[i,2]),1]==0
                 wo[fn,1] = fn;
                 wo[fn,2] = wo[sn,2]+po*L[i]
             end
@@ -645,8 +657,8 @@ function cutwp_prop2(coord,ends)
         for i = 1:nele
             sn = ends[i,1]; fn = ends[i,2]
 
-            sn = Int(sn)
-            fn = Int(fn)
+            sn = convert(Int, sn)
+            fn = convert(Int, fn)
 
             Cw = Cw+1/3*(wn[sn]^2+wn[sn]*wn[fn]+wn[fn]^2)*t[i]* L[i]
         end
@@ -657,13 +669,13 @@ function cutwp_prop2(coord,ends)
         ro = sqrt((I1+I2)/A+s12[1]^2+s12[2]^2)
 
         # compute B1 & B2
-        B1 = 0; B2 = B1
+        B1 = 0 ; B2 = B1
         for i = 1:nele
             sn = ends[i,1]
             fn = ends[i,2];
 
-            sn = Int(sn)
-            fn = Int(fn)
+            sn = convert(Int, sn)
+            fn = convert(Int, fn)
 
             x1 = coord12[sn,1]; y1 = coord12[sn,2]
             x2 = coord12[fn,1]; y2 = coord12[fn,2]
@@ -2098,224 +2110,6 @@ function stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,un
     return node
 
 end
-
-# function view_closed_section_mode_shape(node, shapes, mode_index, scale_x, scale_y)
-
-#     num_nodes = size(node)[1]
-
-#     mode = shapes[mode_index]
-
-#     mode_x = mode[1:2:2*num_nodes]
-#     mode_y = mode[(2*num_nodes + 1):2:4*num_nodes]
-
-#     defx = node[:, 2] .+ scale_x * mode_x
-#     defy = node[:, 3] .+scale_y * mode_y
-
-#     #For a closed cross-section, add first node to end for plotting.
-#     defx = [defx; defx[1]]
-#     defy = [defy; defy[1]]
-
-#     #Define undeformed shape.
-#     undefx = [node[:,2]; node[2,1]]
-#     undefy = [node[:,3]; node[3,2]]
-
-#     plot(undefx, undefy, size = (600,600), legend = false)
-#     plot!(defx, defy, markershape = :o)
-
-# end
-
-function closed_section_analysis(P, Mxx, Mzz, M11, M22, E, ν, coord, ends, lengths)
-
-    #Define number of cross-section elements.
-    num_elem = size(coord)[1]
-
-    #Calculate section properties.
-    section_properties = CUFSM.cutwp_prop2(coord,ends)
-
-    #Map section properties to CUFSM.
-    A = section_properties.A
-    xcg = section_properties.xc
-    zcg = section_properties.yc
-    Ixx = section_properties.Ixx
-    Izz = section_properties.Iyy
-    Ixz = section_properties.Ixy
-    thetap = section_properties.θ
-    I11 = section_properties.I1
-    I22 = section_properties.I2
-    unsymm = 0;  #Sets Ixz=0 if unsymm = 0
-
-    #Define the number of cross-section nodes.
-    num_cross_section_nodes = size(coord)[1]
-
-    #Initialize CUFSM node matrix.
-    node = zeros(Float64, (num_cross_section_nodes, 8))
-
-    #Add node numbers to node matrix.
-    node[:, 1] .= 1:num_cross_section_nodes
-
-    #Add nodal coordinates to node matrix.
-    node[:, 2:3] .= coord
-
-    #Add nodal restraints to node matrix.
-    node[:, 4:7] .= ones(num_cross_section_nodes,4)
-
-    #Initialize CUFSM elem matrix.
-    elem = zeros(Float64, (num_elem, 5))
-
-    #Add element numbers to elem matrix.
-    elem[:, 1] = 1:num_elem
-
-    #Add element connectivity and thickness to elem matrix.
-    elem[:, 2:4] .= ends
-
-    #Add element material reference to elem matrix.
-    elem[:, 5] .= ones(num_elem) * 100
-                            
-    #There are no springs or constraints.
-    springs = []
-    constraints = 0
-
-    #Define material properties.
-    G = E / (2 *(1 + ν))
-    prop = [100 E E ν ν G]
-
-    neigs = 1  #just need the first mode 
-
-    #Add reference stresses to node matrix.
-    node = CUFSM.stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,unsymm)
-
-    #Run CUFSM.
-    curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
-
-    return curve, shapes, node, elem
-
-end
-
-
-# function view_multi_branch_section_mode_shape(node, elem, shapes, mode_index, scale_x, scale_y, xlims, ylims)
-
-#     num_nodes = size(node)[1]
-
-#     mode = shapes[mode_index]
-
-#     undefx = node[:, 2]
-#     undefy = node[:, 3]
-
-#     mode_x = mode[1:2:2*num_nodes]
-#     mode_y = mode[(2*num_nodes + 1):2:4*num_nodes]
-
-#     defx = node[:, 2] .+ scale_x * mode_x
-#     defy = node[:, 3] .+scale_y * mode_y
-
-#     #For a multi-branch cross-section, plot each element individually.
-
-#     num_elem = size(elem)[1]
-
-#     for i = 1:num_elem
-
-#         node_i = Int(elem[i, 2])
-#         node_j = Int(elem[i, 3])
-
-#         if i == 1
-
-#             plot([undefx[node_i], undefx[node_j]], [undefy[node_i], undefy[node_j]], size = (600, 600), legend = false, linecolor = :black, xlims = xlims, ylims = ylims, aspect_ratio = :equal)
-#             plot!([defx[node_i], defx[node_j]], [defy[node_i], defy[node_j]], legend = false, linecolor = :blue)
-    
-#         else
-#             plot!([undefx[node_i], undefx[node_j]], [undefy[node_i], undefy[node_j]], legend = false, linecolor = :black)
-#             plot!([defx[node_i], defx[node_j]], [defy[node_i], defy[node_j]], legend = false, linecolor = :blue)
-
-#         end
-
-#     end
-
-#     return current()
-
-# end
-
-
-
-function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mzz, M11, M22)
-
-    ####Calculate section properties.
-
-    #Define coord matrix.
-    coord = [x_center y_center]
-
-    #Define number of cross-section elements.
-    num_elem = length(x_center) - 1
-
-    #Define number of nodes.
-    num_nodes = length(x_center)
-
-    #Define element connectivity
-    ends = zeros(num_elem, 3)
-    ends[:, 1] .= 1:(num_nodes-1)
-    ends[:, 2] .= 2:num_nodes
-    ends[:, 3] .= t
-
-    section_properties = CUFSM.cutwp_prop2(coord,ends)
-
-    #Map section properties to CUFSM.
-    A = section_properties.A
-    xcg = section_properties.xc
-    zcg = section_properties.yc
-    Ixx = section_properties.Ixx
-    Izz = section_properties.Iyy
-    Ixz = section_properties.Ixy
-    thetap = section_properties.θ
-    I11 = section_properties.I1
-    I22 = section_properties.I2
-    unsymm = 0  #Sets Ixz=0 if unsymm = 0
-
-    #Define the number of cross-section nodes.
-    num_cross_section_nodes = size(coord)[1]
-
-    #Initialize CUFSM node matrix.
-    node = zeros(Float64, (num_cross_section_nodes, 8))
-
-    #Add node numbers to node matrix.
-    node[:, 1] .= 1:num_cross_section_nodes
-
-    #Add nodal coordinates to node matrix.
-    node[:, 2:3] .= coord
-
-    #Add nodal restraints to node matrix.
-    node[:, 4:7] .= ones(num_cross_section_nodes,4)
-
-    #Initialize CUFSM elem matrix.
-    elem = zeros(Float64, (num_elem, 5))
-
-    #Add element numbers to elem matrix.
-    elem[:, 1] = 1:num_elem
-
-    #Add element connectivity and thickness to elem matrix.
-    elem[:, 2:4] .= ends
-
-    #Add element material reference to elem matrix.
-    elem[:, 5] .= ones(num_elem) * 100
-                            
-    #There are no springs or constraints.
-    springs = []
-    constraints = 0
-
-    #Define material properties.
-    G = E / (2 *(1 + ν))
-    prop = [100 E E ν ν G]
-
-    neigs = 1  #just need the first mode 
-
-    #Add reference stresses to node matrix.
-    node = CUFSM.stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,unsymm)
-
-    #Run CUFSM.
-    curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
-
-    return curve, shapes, node, elem
-
-end
-
-
 
 
 end #module
