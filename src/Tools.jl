@@ -27,10 +27,26 @@ using ..CUFSM
 
 # end
 
-function closed_section_analysis(P, Mxx, Mzz, M11, M22, E, ν, coord, ends, lengths)
+function closed_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mzz, M11, M22, constraints, springs)
+
+    #Define coord matrix.
+    coord = [x_center y_center]
 
     #Define number of cross-section elements.
-    num_elem = size(coord)[1]
+    num_elem = length(x_center)
+
+    #Define number of nodes.
+    num_nodes = length(x_center)
+
+    start_nodes = 1:num_nodes
+    end_nodes = [2:num_nodes; 1]
+    ends = [start_nodes end_nodes t]
+
+    # #Define element connectivity
+    # ends = zeros(num_elem, 3)
+    # ends[:, 1] .= 1:(num_nodes-1)
+    # ends[:, 2] .= 2:num_nodes
+    # ends[:, 3] .= t
 
     #Calculate section properties.
     section_properties = CUFSM.cutwp_prop2(coord,ends)
@@ -75,8 +91,8 @@ function closed_section_analysis(P, Mxx, Mzz, M11, M22, E, ν, coord, ends, leng
     elem[:, 5] .= ones(num_elem) * 100
                             
     #There are no springs or constraints.
-    springs = []
-    constraints = 0
+    # springs = []
+    # constraints = 0
 
     #Define material properties.
     G = E / (2 *(1 + ν))
@@ -90,7 +106,10 @@ function closed_section_analysis(P, Mxx, Mzz, M11, M22, E, ν, coord, ends, leng
     #Run CUFSM.
     curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
 
-    return curve, shapes, node, elem
+    model = CUFSM.Model(prop=prop, node=node, elem=elem, lengths=lengths, springs=springs, constraints=constraints, neigs=neigs, curve=curve, shapes=shapes)
+
+
+    return model
 
 end
 
@@ -220,5 +239,12 @@ function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mz
     return model
 
 end
+
+function get_load_factor(model)
+
+    load_factor = [model.curve[i][2] for i in eachindex(model.curve)]
+
+end
+
 
 end #module 
