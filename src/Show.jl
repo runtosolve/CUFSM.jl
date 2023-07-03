@@ -159,10 +159,10 @@ function show_element_deformed_shape!(ax, element_XY, Δ, scale, attributes, lin
 
 end
 
-function signature_curve(model, scale)
+function signature_curve(model, eig, scale)
 
-    Pcr = Tools.get_load_factor(model)
-    figure = Figure()
+    Pcr = Tools.get_load_factor(model, eig)
+    figure = Figure(resolution = (4.0*72, 4.0*72))
     ax = Axis(figure[1, 1])
     [scatterlines!(model.lengths .* scale[1], Pcr .* scale[2], color=:blue) for i in eachindex(Pcr)];
     
@@ -171,16 +171,16 @@ function signature_curve(model, scale)
 end
 
 
-function minimum_mode_shape(model, t, deformation_scale, drawing_scale)
+function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale)
     
     # x = model.node[:, 2]
     # y = model.node[:, 3]
     # Δx = abs(maximum(x) - minimum(x))
     # Δy = abs(maximum(y) - minimum(y))
 
-    Pcr = Tools.get_load_factor(model)
+    Pcr = Tools.get_load_factor(model, eig)
     mode_index = argmin(Pcr)
-    mode = model.shapes[mode_index]
+    mode = model.shapes[mode_index][:, eig]
 
     n = fill(5, length(t))
 

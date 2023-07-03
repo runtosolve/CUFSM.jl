@@ -26,7 +26,7 @@ using .Show
 
 end
 
-struct SectionPropertiesObject
+mutable struct SectionPropertiesObject
 
     node_geometry::Array{Float64, 2}
     element_info::Array{Float64, 2}

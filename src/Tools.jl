@@ -157,7 +157,7 @@ end
 
 
 
-function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mzz, M11, M22, constraints, springs)
+function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mzz, M11, M22, constraints, springs, neigs)
 
     ####Calculate section properties.
 
@@ -225,7 +225,7 @@ function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mz
     G = E / (2 *(1 + ν))
     prop = [100 E E ν ν G]
 
-    neigs = 1  #just need the first mode 
+    # neigs = 1  #just need the first mode 
 
     #Add reference stresses to node matrix.
     node = CUFSM.stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,unsymm)
@@ -240,9 +240,9 @@ function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mz
 
 end
 
-function get_load_factor(model)
+function get_load_factor(model, eig)
 
-    load_factor = [model.curve[i][2] for i in eachindex(model.curve)]
+    load_factor = [model.curve[i][eig, 2] for i in eachindex(model.curve)]
 
 end
 
