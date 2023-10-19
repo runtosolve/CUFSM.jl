@@ -207,4 +207,35 @@ function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale)
 end
 
 
+
+
+function mode_shape(model, eig, mode_index, t, deformation_scale, drawing_scale)
+    
+    mode = model.shapes[mode_index][:, eig]
+
+    n = fill(5, length(t))
+
+    cross_section_coords, Δ, figure_max_dims = cross_section_mode_shape_info(model.elem, model.node, mode, n, deformation_scale)
+   
+    Δx = figure_max_dims[1]
+    Δy = figure_max_dims[2]
+
+    figure = Figure(resolution = (Δx*72, Δy*72) .* drawing_scale)
+    ax = Axis(figure[1, 1], aspect = Δx/Δy)
+    hidedecorations!(ax)  # hides ticks, grid and lables
+    hidespines!(ax)  # hide the frame
+    thickness_scale = maximum(t) * 72 * drawing_scale
+    linewidths = t ./ maximum(t) * thickness_scale
+    
+    attributes = (color=:grey, linestyle=:solid, linewidth=linewidths, marker=:circle, markersize=0)
+    [show_element_deformed_shape!(ax, cross_section_coords[i], Δ[i], deformation_scale, attributes, attributes.linewidth[i]) for i in eachindex(Δ)];
+   
+
+    # cross_section_mode_shape!(ax, model.elem, model.node, mode, n, deformation_scale, attributes);
+    
+    return ax, figure
+
+end
+
+
 end #module 

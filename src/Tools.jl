@@ -240,6 +240,98 @@ function open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mz
 
 end
 
+
+
+
+function open_section_analysis(x_center, y_center, ends::Matrix{Float64}, lengths, E, ν, P, Mxx, Mzz, M11, M22, constraints, springs, neigs)
+
+    ####Calculate section properties.
+
+    #Define coord matrix.
+    coord = [x_center y_center]
+
+    #Define number of cross-section elements.
+    num_elem = length(x_center) - 1
+
+    #Define number of nodes.
+    num_nodes = length(x_center)
+
+    # #Define element connectivity
+    # ends = zeros(num_elem, 3)
+    # ends[:, 1] .= 1:(num_nodes-1)
+    # ends[:, 2] .= 2:num_nodes
+    # ends[:, 3] .= t
+
+    section_properties = CUFSM.cutwp_prop2(coord,ends)
+
+    #Map section properties to CUFSM.
+    A = section_properties.A
+    xcg = section_properties.xc
+    zcg = section_properties.yc
+    Ixx = section_properties.Ixx
+    Izz = section_properties.Iyy
+    Ixz = section_properties.Ixy
+    thetap = section_properties.θ
+    I11 = section_properties.I1
+    I22 = section_properties.I2
+    unsymm = 0  #Sets Ixz=0 if unsymm = 0
+
+    #Define the number of cross-section nodes.
+    num_cross_section_nodes = size(coord)[1]
+
+    #Initialize CUFSM node matrix.
+    node = zeros(Float64, (num_cross_section_nodes, 8))
+
+    #Add node numbers to node matrix.
+    node[:, 1] .= 1:num_cross_section_nodes
+
+    #Add nodal coordinates to node matrix.
+    node[:, 2:3] .= coord
+
+    #Add nodal restraints to node matrix.
+    node[:, 4:7] .= ones(num_cross_section_nodes,4)
+
+    #Initialize CUFSM elem matrix.
+    elem = zeros(Float64, (num_elem, 5))
+
+    #Add element numbers to elem matrix.
+    elem[:, 1] = 1:num_elem
+
+    #Add element connectivity and thickness to elem matrix.
+    elem[:, 2:4] .= ends
+
+    #Add element material reference to elem matrix.
+    elem[:, 5] .= ones(num_elem) * 100
+                            
+    #There are no springs or constraints.
+    # springs = []
+    # constraints = 0
+
+    #Define material properties.
+    G = E / (2 *(1 + ν))
+    prop = [100 E E ν ν G]
+
+    # neigs = 1  #just need the first mode 
+
+    #Add reference stresses to node matrix.
+    node = CUFSM.stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,unsymm)
+
+    #Run CUFSM.
+    curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
+
+    #collect up 
+    model = CUFSM.Model(prop=prop, node=node, elem=elem, lengths=lengths, springs=springs, constraints=constraints, neigs=neigs, curve=curve, shapes=shapes)
+
+    return model
+
+end
+
+
+
+
+
+
+
 function get_load_factor(model, eig)
 
     load_factor = [model.curve[i][eig, 2] for i in eachindex(model.curve)]
