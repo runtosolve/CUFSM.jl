@@ -11,6 +11,10 @@ export Show
 include("Show.jl")
 using .Show
 
+export Export 
+include("Export.jl")
+using .Export
+
 
 @with_kw struct Model
 
@@ -26,7 +30,7 @@ using .Show
 
 end
 
-mutable struct SectionPropertiesObject
+@with_kw mutable struct SectionPropertiesObject
 
     node_geometry::Array{Float64, 2}
     element_info::Array{Float64, 2}

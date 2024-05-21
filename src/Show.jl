@@ -151,11 +151,14 @@ function show_element_deformed_shape!(ax, element_XY, Δ, scale, attributes, lin
     ΔX = [Δ[i][1] for i in eachindex(element_XY)]
     ΔY = [Δ[i][2] for i in eachindex(element_XY)]
 
-    for i=1:(length(X)-1)
 
-        scatterlines!(ax, [X[i] + scale[1] * ΔX[i], X[i+1] + scale[1] * ΔX[i+1]], [Y[i] + scale[2] * ΔY[i], Y[i+1] + scale[2] * ΔY[i+1]], linestyle=attributes.linestyle, color=attributes.color, linewidth=line_thickness, marker = attributes.marker, markersize=attributes.markersize)
+    lines!(ax, X .+ scale[1] * ΔX, Y .+ scale[2] * ΔY, linestyle=attributes.linestyle, color=attributes.color, linewidth=line_thickness)
 
-    end
+    # for i=1:(length(X)-1)
+
+    #     scatterlines!(ax, [X[i] + scale[1] * ΔX[i], X[i+1] + scale[1] * ΔX[i+1]], [Y[i] + scale[2] * ΔY[i], Y[i+1] + scale[2] * ΔY[i+1]], linestyle=attributes.linestyle, color=attributes.color, linewidth=line_thickness, marker = attributes.marker, markersize=attributes.markersize)
+
+    # end
 
 end
 
@@ -163,6 +166,18 @@ function signature_curve(model, eig, scale)
 
     Pcr = Tools.get_load_factor(model, eig)
     figure = Figure(resolution = (4.0*72, 4.0*72))
+    ax = Axis(figure[1, 1])
+    [scatterlines!(model.lengths .* scale[1], Pcr .* scale[2], color=:blue) for i in eachindex(Pcr)];
+    
+    return ax, figure 
+
+end
+
+#function signature_curve(model, eig, scale; figure = Figure())
+function signature_curve(model, eig, scale, figure)
+
+    Pcr = Tools.get_load_factor(model, eig)
+    # figure = Figure(resolution = (4.0*72, 4.0*72))
     ax = Axis(figure[1, 1])
     [scatterlines!(model.lengths .* scale[1], Pcr .* scale[2], color=:blue) for i in eachindex(Pcr)];
     
@@ -185,11 +200,58 @@ function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale)
     n = fill(5, length(t))
 
     cross_section_coords, Δ, figure_max_dims = cross_section_mode_shape_info(model.elem, model.node, mode, n, deformation_scale)
+
+    linesegment_ranges, t_segments = LinesCurvesNodes.find_linesegments(t)
+    coords_as_linesegments = LinesCurvesNodes.combine_points_into_linesegments(linesegment_ranges, cross_section_coords)
+    Δ_as_linesegments = LinesCurvesNodes.combine_points_into_linesegments(linesegment_ranges, Δ)
    
     Δx = figure_max_dims[1]
     Δy = figure_max_dims[2]
 
     figure = Figure(resolution = (Δx*72, Δy*72) .* drawing_scale)
+    ax = Axis(figure[1, 1], aspect = Δx/Δy)
+    hidedecorations!(ax)  # hides ticks, grid and lables
+    hidespines!(ax)  # hide the frame
+    # thickness_scale = maximum(t) * 72 * drawing_scale
+    # linewidths = t ./ maximum(t) * thickness_scale
+
+    thickness_scale = maximum(t_segments) * 72 * drawing_scale
+    linewidths = t_segments ./ maximum(t_segments) * thickness_scale
+    
+    attributes = (color=:grey, linestyle=:solid)
+
+    # linesegment_ranges = LinesCurvesNodes.find_line_segments(linewidths)
+
+    # [show_element_deformed_shape!(ax, cross_section_coords[i], Δ[i], deformation_scale, attributes, attributes.linewidth[i]) for i in eachindex(Δ)];
+   
+    [show_element_deformed_shape!(ax, coords_as_linesegments[i], Δ_as_linesegments[i], deformation_scale, attributes, linewidths[i]) for i in eachindex(Δ_as_linesegments)];
+
+    # cross_section_mode_shape!(ax, model.elem, model.node, mode, n, deformation_scale, attributes);
+    
+    return ax, figure
+
+end
+
+
+function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale, figure)
+    
+    # x = model.node[:, 2]
+    # y = model.node[:, 3]
+    # Δx = abs(maximum(x) - minimum(x))
+    # Δy = abs(maximum(y) - minimum(y))
+
+    Pcr = Tools.get_load_factor(model, eig)
+    mode_index = argmin(Pcr)
+    mode = model.shapes[mode_index][:, eig]
+
+    n = fill(5, length(t))
+
+    cross_section_coords, Δ, figure_max_dims = cross_section_mode_shape_info(model.elem, model.node, mode, n, deformation_scale)
+   
+    Δx = figure_max_dims[1]
+    Δy = figure_max_dims[2]
+
+    # figure = Figure(resolution = (Δx*72, Δy*72) .* drawing_scale)
     ax = Axis(figure[1, 1], aspect = Δx/Δy)
     hidedecorations!(ax)  # hides ticks, grid and lables
     hidespines!(ax)  # hide the frame
@@ -206,6 +268,46 @@ function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale)
 
 end
 
+
+
+
+
+
+
+# function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale, figure = Figure())
+    
+#     # x = model.node[:, 2]
+#     # y = model.node[:, 3]
+#     # Δx = abs(maximum(x) - minimum(x))
+#     # Δy = abs(maximum(y) - minimum(y))
+
+#     Pcr = Tools.get_load_factor(model, eig)
+#     mode_index = argmin(Pcr) 
+#     mode = model.shapes[mode_index][:, eig]
+
+#     n = fill(5, length(t))
+
+#     cross_section_coords, Δ, figure_max_dims = cross_section_mode_shape_info(model.elem, model.node, mode, n, deformation_scale)
+   
+#     Δx = figure_max_dims[1]
+#     Δy = figure_max_dims[2]
+
+#     # figure = Figure(resolution = (Δx*72, Δy*72) .* drawing_scale)
+#     ax = Axis(figure[1, 1], aspect = Δx/Δy)
+#     hidedecorations!(ax)  # hides ticks, grid and lables
+#     hidespines!(ax)  # hide the frame
+#     thickness_scale = maximum(t) * 72 * drawing_scale
+#     linewidths = t ./ maximum(t) * thickness_scale
+    
+#     attributes = (color=:grey, linestyle=:solid, linewidth=linewidths, marker=:circle, markersize=0)
+#     [show_element_deformed_shape!(ax, cross_section_coords[i], Δ[i], deformation_scale, attributes, attributes.linewidth[i]) for i in eachindex(Δ)];
+   
+#     figure
+#     # cross_section_mode_shape!(ax, model.elem, model.node, mode, n, deformation_scale, attributes);
+    
+#     # return ax, figure
+
+# end
 
 
 

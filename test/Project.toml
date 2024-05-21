@@ -1,3 +1,5 @@
 [deps]
 CUFSM = "82b4978f-06ae-48e0-88e8-a26b4f7a0fa1"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+LinesCurvesNodes = "74a74c3a-221d-4cd1-a4eb-c3c8149e7592"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
