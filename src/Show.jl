@@ -165,7 +165,7 @@ end
 function signature_curve(model, eig, scale)
 
     Pcr = Tools.get_load_factor(model, eig)
-    figure = Figure(resolution = (4.0*72, 4.0*72))
+    figure = Figure(size = (4.0*72, 4.0*72))
     ax = Axis(figure[1, 1])
     [scatterlines!(model.lengths .* scale[1], Pcr .* scale[2], color=:blue) for i in eachindex(Pcr)];
     
@@ -208,7 +208,7 @@ function minimum_mode_shape(model, eig, t, deformation_scale, drawing_scale)
     Δx = figure_max_dims[1]
     Δy = figure_max_dims[2]
 
-    figure = Figure(resolution = (Δx*72, Δy*72) .* drawing_scale)
+    figure = Figure(size = (Δx*72, Δy*72) .* drawing_scale)
     ax = Axis(figure[1, 1], aspect = Δx/Δy)
     hidedecorations!(ax)  # hides ticks, grid and lables
     hidespines!(ax)  # hide the frame
@@ -322,7 +322,7 @@ function mode_shape(model, eig, mode_index, t, deformation_scale, drawing_scale)
     Δx = figure_max_dims[1]
     Δy = figure_max_dims[2]
 
-    figure = Figure(resolution = (Δx*72, Δy*72) .* drawing_scale)
+    figure = Figure(size = (Δx*72, Δy*72) .* drawing_scale)
     ax = Axis(figure[1, 1], aspect = Δx/Δy)
     hidedecorations!(ax)  # hides ticks, grid and lables
     hidespines!(ax)  # hide the frame
