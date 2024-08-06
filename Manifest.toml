@@ -715,7 +715,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LinesCurvesNodes]]
 deps = ["LinearAlgebra", "Parameters", "Rotations", "StaticArrays", "Unitful"]
-path = "/Users/crismoen/.julia/dev/LinesCurvesNodes"
+git-tree-sha1 = "f61322d1c24f04159e6d63dc96bd28b5c2eac899"
+repo-rev = "main"
+repo-url = "https://github.com/runtosolve/LinesCurvesNodes.jl.git"
 uuid = "74a74c3a-221d-4cd1-a4eb-c3c8149e7592"
 version = "0.1.0"
 
