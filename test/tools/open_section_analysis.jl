@@ -5,7 +5,7 @@ using CUFSM, CrossSectionGeometry
 #Example III-3
 
 
-t = 0.0566
+t = 0.0566 
 section_dimensions = [0.500, 1.625, 3.625, 1.625, 0.500]
 r = [0.0849+t, 0.0849+t, 0.0849+t, 0.0849+t]
 n = [3, 3, 3, 3, 3]
@@ -28,10 +28,15 @@ springs = []
 lengths = 2.0:1.0:30
 neigs = 1
 
-x_center = [section_geometry.center[i][1] for i in eachindex(section_geometry.center)]
-y_center = [section_geometry.center[i][2] for i in eachindex(section_geometry.center)]
+x_center = [section_geometry.centerline_node_XY[i][1] for i in eachindex(section_geometry.centerline_node_XY)]
+y_center = [section_geometry.centerline_node_XY[i][2] for i in eachindex(section_geometry.centerline_node_XY)]
+
+t_all = fill(t, length(x_center)-1)
 
 model = CUFSM.Tools.open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mzz, M11, M22, constraints, springs, neigs)
+
+
+# open_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, Mzz, M11, M22, constraints, springs, neigs)
 
 # scale = (1.0, 1.0)
 # eig = 1
