@@ -1,6 +1,6 @@
 module CUFSM
 
-using SparseArrays, LinearAlgebra, Statistics, Parameters
+using SparseArrays, LinearAlgebra, Statistics
 
 
 export Tools
@@ -11,12 +11,12 @@ using .Tools
 # include("Show.jl")
 # using .Show
 
-# export Export 
-# include("Export.jl")
-# using .Export
+export Export 
+include("Export.jl")
+using .Export
 
 
-@with_kw struct Model
+struct Model
 
     prop::Matrix{Float64}
     node::Matrix{Float64}
@@ -30,7 +30,7 @@ using .Tools
 
 end
 
-@with_kw mutable struct SectionPropertiesObject
+mutable struct SectionPropertiesObject
 
     node_geometry::Array{Float64, 2}
     element_info::Array{Float64, 2}

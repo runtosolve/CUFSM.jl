@@ -1,4 +1,4 @@
-using CUFSM, CrossSection, AISIS100
+using CUFSM, CrossSectionGeometry, AISIS100
 
 
 #AISI D100-17E Cold-Formed Steel Design Manual Volume 1
