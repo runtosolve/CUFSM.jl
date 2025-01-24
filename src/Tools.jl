@@ -106,7 +106,7 @@ function closed_section_analysis(x_center, y_center, t, lengths, E, ν, P, Mxx, 
     #Run CUFSM.
     curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
 
-    model = CUFSM.Model(prop=prop, node=node, elem=elem, lengths=lengths, springs=springs, constraints=constraints, neigs=neigs, curve=curve, shapes=shapes)
+    model = CUFSM.Model(prop, node, elem, lengths, springs, constraints, neigs, curve, shapes)
 
 
     return model

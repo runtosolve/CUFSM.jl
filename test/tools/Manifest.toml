@@ -47,7 +47,7 @@ version = "1.0.1+0"
 
 [[deps.CUFSM]]
 deps = ["LinearAlgebra", "LinesCurvesNodes", "MAT", "SparseArrays", "Statistics"]
-git-tree-sha1 = "6a3ac57ab2f1262ed6afab9441b10953ad0c0e5d"
+git-tree-sha1 = "de3bd242678d654bf157fa9eab8bcfcdd9f54f53"
 repo-rev = "main"
 repo-url = "https://github.com/runtosolve/CUFSM.jl.git"
 uuid = "82b4978f-06ae-48e0-88e8-a26b4f7a0fa1"
