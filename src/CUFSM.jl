@@ -16,19 +16,38 @@ include("Export.jl")
 using .Export
 
 
+# struct Model
+
+#     prop::Matrix{Float64}
+#     node::Matrix{Float64}
+#     elem::Matrix{Float64}
+#     lengths::Array{Float64}
+#     springs::Any
+#     constraints::Any #Union{Matrix{Float64}, Int64}
+#     neigs::Int64
+#     # curve::Vector{Matrix{Float64}}
+#     # shapes::Vector{Matrix{Float64}}
+#     curve    #remove types because they have problems when converting from JSON to Model with StructTypes, combines a Matrix into a vector which is unwanted 
+#     shapes
+
+# end
+
+#remove types because they have problems when converting from JSON to Model with StructTypes, combines a Matrix into a vector which is unwanted 
 struct Model
 
-    prop::Matrix{Float64}
-    node::Matrix{Float64}
-    elem::Matrix{Float64}
-    lengths::Array{Float64}
-    springs::Any
-    constraints::Any #Union{Matrix{Float64}, Int64}
-    neigs::Int64
-    curve::Vector{Matrix{Float64}}
-    shapes::Vector{Matrix{Float64}}
+    prop
+    node
+    elem
+    lengths
+    springs
+    constraints
+    neigs
+    curve    
+    shapes
 
 end
+
+
 
 mutable struct SectionPropertiesObject
 
