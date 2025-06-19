@@ -80,7 +80,7 @@ neigs = 20
 curve, shapes = CUFSM.strip(prop, node, elem, lengths, springs, constraints, neigs)
 
 file_path = "/Users/crismoen/.julia/dev/CUFSM/test"
-file_name = "CUFSM_default_julia.mat"
+file_name = "CUFSM_default_julia_1.mat"
 CUFSM.Export.to_MAT(file_path, file_name, elem, lengths, node, prop)
 
 
