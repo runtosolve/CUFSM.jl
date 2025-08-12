@@ -1879,6 +1879,11 @@ function strip(prop,node,elem,lengths,springs,constraints,neigs)
     #Ported to Julia.
     #Old school CUFSM here, no cFSM and just "S-S" boundary conditions.
 
+    #round nodal coordinates to match standalone CUFSM GUI rounding 
+    
+    lengths = round.(lengths, digits=2) 
+    node[:, 2:3] = round.(node[:, 2:3], digits=4)
+
     m_all = ones(length(lengths))
     BC = "S-S"
 
