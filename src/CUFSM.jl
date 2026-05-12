@@ -2133,9 +2133,9 @@ function stresgen(node,P,Mxx,Mzz,M11,M22,A,xcg,zcg,Ixx,Izz,Ixz,thetap,I11,I22,un
     end
     stress = stress .+ stressinc
     #assign stress to node variable
-    # node[:,8] .= stress
+    node[:,8] .= stress
 
-    node[:,8] .= round.(stress, digits=3) #round check
+    # node[:,8] .= round.(stress, digits=3) #round check
 
     return node
 
