@@ -1,32 +1,12 @@
 module Export
 
 
-using MAT
+# to_MAT is implemented in ext/CUFSMMATExt.jl, which Julia loads automatically
+# once MAT is loaded alongside CUFSM (`using CUFSM, MAT`). Keeping MAT a weak
+# dependency means projects that never write .mat files do not install
+# MAT -> HDF5 -> MPI.
+function to_MAT end
 
+to_MAT(args...) = error("CUFSM.Export.to_MAT needs MAT.jl: add it to your environment and run `using MAT`.")
 
-function to_MAT(file_path, file_name, elem, lengths, node, prop)
-
-    m_all_input = Matrix{Any}(undef, (1, size(lengths)[1]))
-
-    for i in eachindex(lengths)
-        m_all_input[i] = 1
-    end
-
-    matwrite(joinpath(file_path, file_name), Dict(
-        "BC" => "S-S",
-        "clas" => Matrix{Float64}(undef, 0, 0),
-        "constraints" => 0,
-        "curve" => Matrix{Float64}(undef, 0, 0),
-        "elem" => elem,
-        "GBTcon" => Dict{String, Any}("local"=>0.0, "ospace"=>1.0, "other"=>0.0, "couple"=>1.0, "orth"=>2.0, "dist"=>0.0, "glob"=>0.0),
-        "lengths" => lengths,
-        "m_all" =>  m_all_input,
-        "node" => node,
-        "prop" => prop,
-        "shapes" =>  Matrix{Float64}(undef, 0, 0),
-        "springs" => 0
-    ); compress = false)
-
-end
-
-end  #module 
+end  #module

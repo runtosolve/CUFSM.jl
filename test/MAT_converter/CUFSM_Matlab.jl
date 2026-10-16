@@ -1,4 +1,4 @@
-using CUFSM
+using CUFSM, MAT  # MAT loads the CUFSMMATExt extension that provides Export.to_MAT
 
 
 prop = [100 29500.00 29500.00 0.30 0.30 11346.15]
